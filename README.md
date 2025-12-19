@@ -24,3 +24,63 @@ mkdir -p /opt/scripts
 cd /opt/scripts
 git clone [https://github.com/YOUR_USERNAME/dockge-update-checker.git](https://github.com/YOUR_USERNAME/dockge-update-checker.git) .
 chmod +x dockge-update-check.sh
+
+```
+
+### 2. Configure Notifications
+
+Copy the example environment file:
+
+```bash
+cp notification.env.example notification.env
+nano notification.env
+
+```
+
+Add your webhook logic (Discord, Gotify, etc.) inside the `send_notif` function.
+
+### 3. Check Paths
+
+Open `dockge-update-check.sh` and ensure `STACKS_DIR` matches your Dockge configuration.
+
+* Default Dockge path: `/opt/stacks`
+* Script default: `/opt/stacks`
+
+## Usage
+
+### Manual Run
+
+```bash
+./dockge-update-check.sh
+
+```
+
+### Automatic Check (Cron)
+
+To check for updates every day at 04:00 AM:
+
+```bash
+crontab -e
+
+```
+
+Add the following line:
+
+```bash
+0 4 * * * /opt/scripts/dockge-update-check.sh >> /var/log/dockge-update.log 2>&1
+
+```
+
+## How it works
+
+1. It iterates through folders in `/opt/stacks`.
+2. It runs `docker compose pull -q` to download new layers.
+3. It inspects the Image ID of the running container and compares it with the local Image ID.
+4. If they differ, it adds the stack to the notification list.
+5. It runs `docker image prune -f` to remove the old image layers that are now "dangling" (replaced by the new pull).
+
+## License
+
+MIT
+
+
